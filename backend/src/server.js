@@ -7,13 +7,15 @@ const authenticateJWT = require("../src/middleware/auth.middleware");
 const authorizeRoles = require("../src/middleware/authorizeRoles");
 
 app.use(express.json());
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 const authRoutes = require("./modules/auth/auth.routes");
 const areaRoutes = require("./modules/areas/area.routes");
+const feedingLogsRoutes = require("./modules/Feeding_Logs/feeding_logs.routes");
 
 app.use("/auth", authRoutes);
 app.use("/areas", areaRoutes);
+app.use("/feeding-logs", feedingLogsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is running");
