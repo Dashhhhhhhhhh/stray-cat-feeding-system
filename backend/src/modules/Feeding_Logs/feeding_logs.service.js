@@ -141,15 +141,56 @@ async function createFeedingLogsService(feedingData) {
   };
 }
 
-async function getAllFeedingLogsService() {
-  const logs = await getAllFeedingLogs();
+async function getAllFeedingLogsService(query) {
+  let { page, pageSize, sortBy, sortOrder, is_deleted } = query;
+
+  page = Number(page);
+  pageSize = Number(pageSize);
+
+  if (!Number.isInteger(page) || page < 1) {
+    page = 1;
+  }
+
+  if (!Number.isInteger(pageSize) || pageSize < 1) {
+    pageSize = 10;
+  }
+
+  const allowedSortColumns = ["feeding_time", "created_at"];
+  sortBy = allowedSortColumns.includes(sortBy) ? sortBy : "feeding_time";
+
+  sortOrder = typeof sortOrder === "string" ? sortOrder.toUpperCase() : "DESC";
+  sortOrder = sortOrder === "ASC" ? "ASC" : "DESC";
+
+  if (is_deleted === "true") {
+    is_deleted = true;
+  } else if (is_deleted === "false") {
+    is_deleted = false;
+  } else {
+    is_deleted = false;
+  }
+
+  const feedingLogs = await getAllFeedingLogs({
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+    is_deleted,
+  });
 
   return {
     success: true,
-    message: "All feeding logs retrieved successfully.",
-    data: logs,
+    message: "Feeding logs retrieved successfully.",
+    data: feedingLogs,
+    meta: {
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+      is_deleted,
+    },
   };
 }
+
 async function getFeedingLogByIdService(feeding_log_id) {
   if (!isValidUUID(feeding_log_id)) {
     return {

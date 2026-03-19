@@ -41,9 +41,23 @@ async function findFeedingTypeById(feeding_type_id) {
   return result.rows[0];
 }
 
-async function getAllFeedingLogs() {
-  const result = await pool.query(
-    `SELECT 
+async function getAllFeedingLogs({
+  page = 1,
+  pageSize = 10,
+  sortBy = "feeding_time",
+  sortOrder = "DESC",
+  is_deleted = false,
+}) {
+  const offset = (page - 1) * pageSize;
+  const order = sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+  const allowedSortColumns = ["feeding_time", "created_at"];
+  const safeSortBy = allowedSortColumns.includes(sortBy)
+    ? sortBy
+    : "feeding_time";
+
+  let query = `
+    SELECT
       feeding_log_id,
       area_id,
       fed_by_user_id,
@@ -53,14 +67,31 @@ async function getAllFeedingLogs() {
       notes,
       created_at,
       updated_at,
-      feeding_type_id
-    FROM feeding_logs 
-    WHERE is_deleted = false 
-    ORDER BY feeding_time ASC`,
-  );
+      feeding_type_id,
+      is_deleted
+    FROM feeding_logs
+    WHERE 1=1
+  `;
+
+  const params = [];
+  let paramIndex = 1;
+
+  if (typeof is_deleted === "boolean") {
+    query += ` AND is_deleted = $${paramIndex++}`;
+    params.push(is_deleted);
+  }
+
+  query += `
+    ORDER BY ${safeSortBy} ${order}
+    LIMIT $${paramIndex++}
+    OFFSET $${paramIndex++}
+  `;
+
+  params.push(pageSize, offset);
+
+  const result = await pool.query(query, params);
   return result.rows;
 }
-
 // prettier-ignore
 async function getFeedingLogById(feeding_log_id) {
   const result = await pool.query(

@@ -40,15 +40,15 @@ async function createFeedingLogsController(req, res) {
 
 async function getAllFeedingLogsController(req, res) {
   try {
-    const result = await getAllFeedingLogsService(req.body);
+    const result = await getAllFeedingLogsService(req.query);
 
-    if (!result.success) {
-      return res.status(404).json(result);
-    }
     return res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching all feeding log:", error);
-    return res.status(500).json({ success: false, message: "Server error." });
+    console.error("Get all feeding logs controller error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
   }
 }
 
