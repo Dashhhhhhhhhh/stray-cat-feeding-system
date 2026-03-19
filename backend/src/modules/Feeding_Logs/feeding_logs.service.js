@@ -4,6 +4,9 @@ const {
   getAllFeedingLogs,
   getFeedingLogById,
   editFeedingLogs,
+  deleteLogs,
+  restoreLogs,
+  getFindDeledLogsById,
 } = require("./feeding_logs.repository");
 
 const { getAreasById } = require("../areas/areas.repository.js");
@@ -322,9 +325,82 @@ async function editFeedingLogsService(feeding_log_id, payload) {
   };
 }
 
+async function deleteLogsService(feeding_log_id) {
+  if (!isValidUUID(feeding_log_id)) {
+    return {
+      success: false,
+      code: "INVALID_ID",
+      message: "Invalid feeding log ID.",
+    };
+  }
+
+  const logs = await getFeedingLogById(feeding_log_id);
+
+  if (!logs) {
+    return {
+      success: false,
+      code: "NOT_FOUND",
+      message: "Feeding log not found.",
+    };
+  }
+
+  if (logs.is_deleted) {
+    return {
+      success: false,
+      code: "ALREADY_DELETED",
+      messa: "Feeding log already deleted.",
+    };
+  }
+
+  const result = await deleteLogs(feeding_log_id);
+
+  return {
+    success: true,
+    message: "Feeding log successfully deleted.",
+  };
+}
+
+async function restoreLogsService(feeding_log_id) {
+  if (!isValidUUID(feeding_log_id)) {
+    return {
+      success: false,
+      code: "INVALID_ID",
+      message: "Invalid feeding log ID.",
+    };
+  }
+
+  const logs = await getFindDeledLogsById(feeding_log_id);
+
+  if (!logs) {
+    return {
+      success: false,
+      code: "NOT_FOUND",
+      message: "Feeding log not found.",
+    };
+  }
+
+  if (!logs.is_deleted) {
+    return {
+      success: false,
+      code: "ALREADY_DELETED",
+      messa: "Feeding log already active.",
+    };
+  }
+
+  const result = await restoreLogs(feeding_log_id);
+
+  return {
+    success: true,
+    message: "Feeding log successfully restored.",
+    data: result,
+  };
+}
+
 module.exports = {
   createFeedingLogsService,
   getAllFeedingLogsService,
   getFeedingLogByIdService,
   editFeedingLogsService,
+  deleteLogsService,
+  restoreLogsService,
 };

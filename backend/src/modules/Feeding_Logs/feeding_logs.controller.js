@@ -3,6 +3,8 @@ const {
   getAllFeedingLogsService,
   getFeedingLogByIdService,
   editFeedingLogsService,
+  deleteLogsService,
+  restoreLogsService,
 } = require("./feeding_logs.service");
 
 async function createFeedingLogsController(req, res) {
@@ -103,9 +105,50 @@ async function editFeedingLogsController(req, res) {
     return res.status(500).json({ success: false, message: "Server error." });
   }
 }
+
+async function deleteLogsController(req, res) {
+  try {
+    const result = await deleteLogsService(req.params.feeding_log_id);
+    const statusMap = {
+      INVALID_FEEDING_LOG_ID: 400,
+      FEEDING_LOG_NOT_FOUND: 404,
+      ALREADY_DELETED: 409,
+    };
+
+    if (!result.success) {
+      const status = statusMap[result.code] || 400;
+      return res.status(status).json(result);
+    }
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error deleting feeding log:", error);
+    return res.status(500).json({ success: false, message: "Server error." });
+  }
+}
+
+async function restoreLogsController(req, res) {
+  try {
+    const result = await restoreLogsService(req.params.feeding_log_id);
+    const statusMap = {
+      INVALID_FEEDING_LOG_ID: 400,
+      FEEDING_LOG_NOT_FOUND: 404,
+      ALREADY_ACTIVE: 409,
+    };
+    if (!result.success) {
+      const status = statusMap[result.code] || 400;
+      return res.status(status).json(result);
+    }
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error resotring feeding log:", error);
+    return res.status(500).json({ success: false, message: "Server error." });
+  }
+}
 module.exports = {
   createFeedingLogsController,
   getAllFeedingLogsController,
   getFeedingLogByIdController,
   editFeedingLogsController,
+  deleteLogsController,
+  restoreLogsController,
 };

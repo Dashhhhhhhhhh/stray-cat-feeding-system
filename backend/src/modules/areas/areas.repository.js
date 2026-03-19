@@ -69,7 +69,7 @@ async function softDeleteAreas(area_id) {
             SET
                 is_active = false,
                 updated_at = CURRENT_TIMESTAMP
-                WHERE area_id = $1
+                WHERE area_id = $1 AND is_active = true
                 RETURNING *
         `,
     [area_id]
@@ -84,7 +84,7 @@ async function restoreAreas(area_id) {
             SET
                 is_active = true,
                 updated_at = CURRENT_TIMESTAMP
-                WHERE area_id = $1
+                WHERE area_id = $1 AND is_active = false,
                 RETURNING *
         `,
     [area_id],

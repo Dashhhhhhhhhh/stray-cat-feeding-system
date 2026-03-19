@@ -121,10 +121,62 @@ async function editFeedingLogs(feeding_log_id, payload) {
   );
   return result.rows[0];
 }
+
+// prettier-ignore
+async function deleteLogs(feeding_log_id) {
+  const result = await pool.query(
+    `
+      UPDATE feeding_logs
+      SET
+        is_deleted = true,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE feeding_log_id = $1 AND is_deleted = false
+      RETURNING feeding_log_id, is_deleted, updated_at  
+      `,
+    [feeding_log_id]
+  );
+  return result.rows[0];
+}
+
+async function restoreLogs(feeding_log_id) {
+  const result = await pool.query(
+    `
+      UPDATE feeding_logs
+      SET
+        is_deleted = false,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE feeding_log_id = $1 AND is_deleted = true  
+    RETURNING feeding_log_id, is_deleted, updated_at  
+      `,
+    [feeding_log_id],
+  );
+  return result.rows[0];
+}
+
+async function getFindDeledLogsById(feeding_log_id) {
+  const result = await pool.query(
+    `
+      SELECT 
+        feeding_log_id,
+        is_deleted,
+        updated_at
+      FROM
+        feeding_logs
+      WHERE 
+        is_deleted = true
+        AND feeding_log_id = $1
+      `,
+    [feeding_log_id],
+  );
+  return result.rows[0];
+}
 module.exports = {
   createFeedingLogs,
   findFeedingTypeById,
   getAllFeedingLogs,
   getFeedingLogById,
   editFeedingLogs,
+  deleteLogs,
+  restoreLogs,
+  getFindDeledLogsById,
 };
