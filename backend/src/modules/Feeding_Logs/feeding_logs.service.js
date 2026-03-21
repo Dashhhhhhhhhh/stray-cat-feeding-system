@@ -87,14 +87,6 @@ async function createFeedingLogsService(feedingData) {
   }
 
   const normalizedUnit = normalizeUnit(quantity_unit);
-  function getExpectedUnit(feedingTypeName) {
-    const mapping = {
-      "dry food": "g",
-      "wet food": "sachet",
-      treats: "piece",
-    };
-    return mapping[feedingTypeName.toLowerCase()] || null;
-  }
 
   const expectedUnit = getExpectedUnit(feedingType.feeding_type_name);
 
@@ -389,7 +381,7 @@ async function deleteLogsService(feeding_log_id) {
     return {
       success: false,
       code: "ALREADY_DELETED",
-      messa: "Feeding log already deleted.",
+      message: "Feeding log already deleted.",
     };
   }
 
@@ -423,8 +415,8 @@ async function restoreLogsService(feeding_log_id) {
   if (!logs.is_deleted) {
     return {
       success: false,
-      code: "ALREADY_DELETED",
-      messa: "Feeding log already active.",
+      code: "ALREADY_ACTIVE",
+      message: "Feeding log already active.",
     };
   }
 

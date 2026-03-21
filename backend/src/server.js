@@ -12,10 +12,12 @@ const PORT = process.env.PORT || 5000;
 const authRoutes = require("./modules/auth/auth.routes");
 const areaRoutes = require("./modules/areas/area.routes");
 const feedingLogsRoutes = require("./modules/Feeding_Logs/feeding_logs.routes");
+const supplyRoutes = require("./modules/Supplies/supplies.routes");
 
 app.use("/auth", authRoutes);
 app.use("/areas", areaRoutes);
 app.use("/feeding-logs", feedingLogsRoutes);
+app.use("/supplies", supplyRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is running");
